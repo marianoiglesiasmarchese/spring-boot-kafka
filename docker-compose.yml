@@ -1,0 +1,35 @@
+version: '3'
+
+services:
+  zookeeper:
+    #    container_name: zookeeper-local
+    image: bitnami/zookeeper:3-debian-10
+    ports:
+      - 2181:2181
+    volumes:
+      - zookeeper_data:/bitnami
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+
+  kafka:
+    #    container_name: kafka-local
+    image: bitnami/kafka:2-debian-10
+    ports:
+      - 9092:9092
+    volumes:
+      - kafka_data:/bitnami
+      - ./run-kafka.sh:/docker-entrypoint-initkafka.d/1.run-kafka.sh
+    environment:
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+      - KAFKA_LISTENERS=PLAINTEXT://:9092
+      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://127.0.0.1:9092
+      - ALLOW_PLAINTEXT_LISTENER=yes
+    depends_on:
+      - zookeeper
+    restart: on-failure
+
+volumes:
+  zookeeper_data:
+    driver: local
+  kafka_data:
+    driver: local
